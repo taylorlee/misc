@@ -29,7 +29,7 @@ class FSM(object):
     def fail(self, src, dest, label=''):
         self.transition(src, dest, label, color='red')
 
-    def save(self,name='graph',prog='neato'):
+    def save(self,name='graph',prog='dot'):
         self.graph.layout(prog=prog)
         self.graph.draw('{}.png'.format(name))
         return
