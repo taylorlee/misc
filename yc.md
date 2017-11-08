@@ -113,7 +113,7 @@ loops and recursion.
 ## Refactors
 I promised some refactors, so let's get started. 
 The goal is to split our implementation of ```len``` into two parts
-1. makeLen (non-recursive, just knows how to compute length
+1. makeLen (non-recursive, just knows how to compute length)
 2. some kind of function combiner that makes other funtions recursive
 
 Refactors to the rescue:
