@@ -129,7 +129,7 @@ len = recLen(recLen)
 // becomes:
 len = (x => x(x))(recLen)
 
-// combine these two definitions by replacing recLen with it's definition inline:
+// combine these two definitions by replacing recLen with its definition inline:
 len = (x => x(x))(prevRecLen => makeLen(l => prevRecLen(prevRecLen)(l)))
 
 // pull makeLen out so it can be passed as an argument
@@ -164,7 +164,7 @@ Wow! Oh hey, it's the Y-Combinator! Who knew.
 Just to make sure this isn't a fluke, we can use this combinator to build 
 another, slightly more complex, recursive function.
 
-```
+```js
 // fibonnaci function from lambdas
 makeFib = _fib => n =>
     (n < 2)
