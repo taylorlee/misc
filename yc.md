@@ -186,7 +186,7 @@ Here's a hand-wavy non-rigorous proof:
   anonymous functions permit the construction of fixed point combinators
   fixed point combinators allow implicit recursion
   recursion is equivalent to unbounded loops
-  unbounded loops provice turing complete computation
+  unbounded loops provide turing complete computation
   ```
 
 This is why people sometimes call lambda calculus the simplest turing-complete model of computation.
