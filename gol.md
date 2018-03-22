@@ -1,7 +1,7 @@
 
 ## First thoughts with rust:
 
-For a while I've been intrigued by rust and the potential it seems to hold for offering efficiency without compromising productivity.As a predominantly python programmer, I'm intrigued by eliminating dynamic typing errors without sacrificing the use of convenient high level abstractions. Since my first main language was C++, I'm intrigued by memory safety without a garbage collector. I've been watching the development of the language and ecosystem, but never seriously tried to build anything using it other than hello-world, etc.
+For a while I've been intrigued by rust and the potential it seems to hold for offering efficiency without compromising productivity. As a predominantly python programmer, I'm intrigued by eliminating dynamic typing errors without sacrificing the use of convenient high level abstractions. Since my first main language was C++, I'm intrigued by memory safety without a garbage collector. I've been watching the development of the language and ecosystem, but never seriously tried to build anything using it other than hello-world, etc.
 
 As a first test in developing with rust, I decided to pick a problem that would be simple enough to implement a functioning first version quickly, yet complex enough to yield multiple orders of magnitude in efficiency gains through optimization tweaks. To that goal, I picked [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), as the rules are extremely simple, yet some initial configurations can balloon up in computational complexity.
 
@@ -171,19 +171,9 @@ I experimented with a few other optimizations (mostly stack/heap data locality),
 
 1. computing next_generation is inevitably O(NxN), which gets prohibitively expensive at large N
 2. some configurations grow indefinitely, so any border limitation won't be an accurate simulation
-(for example, Acorn emits [gliders](https://en.wikipedia.org/wiki/Glider_(Conway%27s_Life))
-```
- - - - - - -
--            -
--    O       -
--      O     -
--  O O O     -
--            -
- - - - - - -
-```
-which propagate diagonally forever)
+(for example, Acorn emits [gliders](https://en.wikipedia.org/wiki/Glider_(Conway%27s_Life)) which propagate diagonally forever)
 
-From Arrays to HashSets:
+## From Arrays to HashSets:
 
 My solution to removing the bounding nature of the grid was to separate the idea of the cell space and the view pane.
 The new game board would consist of the set of all coordinates currently living.
