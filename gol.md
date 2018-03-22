@@ -142,7 +142,7 @@ fn main() {
     let mut rows = setup();
     let start = Instant::now();
     for i in 0.. {
-        rows = gol(rows);
+        rows = next_generation(rows);
         if i == BENCH {
             let now = start.elapsed();
             let result = now.as_secs() as f64 + now.subsec_nanos() as f64 * 1e-9;
@@ -190,7 +190,7 @@ const VIEW: Range<usize> = (OFFSET-VIEWSIZE/2..1+OFFSET+VIEWSIZE/2);
 
 Note: The simulation *is* still bounded, but MAX (9223372036854775807 on my computer) is more than enough for my purposes.
 
-Correspondingly, the simulating is not waay faster. About a 100X speedup at the 1000-generation benchmark, and even more for higher grid sizes.
+Fortunately, the simulation is waay faster. About a 100X speedup at the 1000-generation benchmark, and even more for higher grid sizes.
 
 Again, take a peek at the [full implementation](https://github.com/taylorlee/misc/blob/master/game_of_life.rs) to see it all together.
 
@@ -206,8 +206,8 @@ rustup doc --book
 ```
 
 The borrow checker took a little getting used to, but the compiler errors were extremely helpful. I was usually able to take the compiler's suggested change to fix borrowing errors. The main complaint I have so far is the number of features currently on the nightly release. (I prefer to stay on stable).
-At the time of writing some of these are:
 
+At the time of writing some of these are:
 * std::collections::Range (in particular the ```contains``` method)
 * benchmarking
 * rustfmt
