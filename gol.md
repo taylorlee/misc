@@ -1,11 +1,11 @@
 
 ## First thoughts with rust:
 
-For a while I've been intruiged by rust and the potential it seems to hold for offering efficiency without compromising productivity.
+For a while I've been intrigued by rust and the potential it seems to hold for offering efficiency without compromising productivity.
 
-As a predominantly python programmer, I'm intruiged by eliminating dynamic typing errors without sacrificing the use of convenient high level abstractions.
+As a predominantly python programmer, I'm intrigued by eliminating dynamic typing errors without sacrificing the use of convenient high level abstractions.
 
-Since my first main language was C++, I'm intruiged by memory safety without a garbage collector.
+Since my first main language was C++, I'm intrigued by memory safety without a garbage collector.
 
 I've been watching the development of the language and ecosystem, but never seriously tried to build anything using it other than hello-world, etc.
 
@@ -74,7 +74,7 @@ fn setup() -> Grid {
     return grid;
 }
 ```
-From there is was relatively straightforward to write functions to print the grid and apply the cellular automata logic to compute the next generation. (grid_print and cell_lives ommitted for brevity)
+From there is was relatively straightforward to write functions to print the grid and apply the cellular automata logic to compute the next generation. (grid_print and cell_lives omitted for brevity)
 
 ```rust
 fn main() {
