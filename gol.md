@@ -1,17 +1,11 @@
 
 ## First thoughts with rust:
 
-For a while I've been intrigued by rust and the potential it seems to hold for offering efficiency without compromising productivity.
+For a while I've been intrigued by rust and the potential it seems to hold for offering efficiency without compromising productivity.As a predominantly python programmer, I'm intrigued by eliminating dynamic typing errors without sacrificing the use of convenient high level abstractions. Since my first main language was C++, I'm intrigued by memory safety without a garbage collector. I've been watching the development of the language and ecosystem, but never seriously tried to build anything using it other than hello-world, etc.
 
-As a predominantly python programmer, I'm intrigued by eliminating dynamic typing errors without sacrificing the use of convenient high level abstractions.
+As a first test in developing with rust, I decided to pick a problem that would be simple enough to implement a functioning first version quickly, yet complex enough to yield multiple orders of magnitude in efficiency gains through optimization tweaks. To that goal, I picked [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), as the rules are extremely simple, yet some initial configurations can balloon up in computational complexity.
 
-Since my first main language was C++, I'm intrigued by memory safety without a garbage collector.
-
-I've been watching the development of the language and ecosystem, but never seriously tried to build anything using it other than hello-world, etc.
-
-As a first test in developing with rust, I decided to pick a problem that would be simple enough to implement a functioning first version quickly, yet complex enough to yield multiple orders of magnitude in efficiency gains through optimization tweaks.
-
-To that goal, I picked [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), as the rules are extremely simple, yet some initial configurations can balloon up in computational complexity.
+(I'll discuss the steps I took, but feel free to jump to the [full implementation](https://github.com/taylorlee/misc/blob/master/game_of_life.rs) if that is appealing.
 
 ## Step one: copy-paste example from internet ;)
 ```rust
@@ -49,8 +43,7 @@ fn clean_grid() -> Grid {
 }
 
 ```
-From there, I could embed a starting configuration within the larger grid.
-I picked the [Acorn config](http://www.conwaylife.com/wiki/Acorn) since it starts small but blooms on for several thousand iterations.
+From there, I could embed a starting configuration within the larger grid. I picked the [Acorn config](http://www.conwaylife.com/wiki/Acorn) since it starts small but blooms on for several thousand iterations.
 ```rust
 fn setup() -> Grid {
     let mut grid = clean_grid();
@@ -74,7 +67,7 @@ fn setup() -> Grid {
     return grid;
 }
 ```
-From there is was relatively straightforward to write functions to print the grid and apply the cellular automata logic to compute the next generation. (grid_print and cell_lives omitted for brevity)
+From there I wrote functions to print the grid and apply the cellular automata logic to compute the next generation. (grid_print and cell_lives omitted for brevity)
 
 ```rust
 fn main() {
@@ -100,6 +93,7 @@ fn next_generation(grid: Grid) -> Grid {
 ```
 And that worked!
 First three generations:
+```
  - - - - - - - - - -
 -                    -
 -                    -
@@ -136,6 +130,7 @@ First three generations:
 -                    -
 -                    -
  - - - - - - - - - -
+```
 
 ## Step four: profile
 Always profile before optimization!
@@ -172,11 +167,12 @@ A really easy optimization was to shrink the grid's memory footprint by switchin
 ```
 And that speed up the simulation by about 10X!
 
-I experimented with a few other optimizations, but it became clear that the grid approach was flawed for two reasons:
+I experimented with a few other optimizations (mostly stack/heap data locality), but it became clear that the grid approach was flawed for two reasons:
 
-1. computing next_generation is inevitable O(NxN), which gets prohibitively expensive at large N
+1. computing next_generation is inevitably O(NxN), which gets prohibitively expensive at large N
 2. some configurations grow indefinitely, so any border limitation won't be an accurate simulation
 (for example, Acorn emits [gliders](https://en.wikipedia.org/wiki/Glider_(Conway%27s_Life))
+```
  - - - - - -
 -            -
 -    O       -
@@ -184,6 +180,7 @@ I experimented with a few other optimizations, but it became clear that the grid
 -  O O O     -
 -            -
  - - - - - -
+```
 which propagate diagonally forever)
 
 From Arrays to HashSets:
@@ -205,6 +202,8 @@ Note: The simulation *is* still bounded, but MAX (9223372036854775807 on my comp
 
 Correspondingly, the simulating is not waay faster. About a 100X speedup at the 1000-generation benchmark, and even more for higher grid sizes.
 
+Again, take a peek at the [full implementation](https://github.com/taylorlee/misc/blob/master/game_of_life.rs) to see it all together.
+
 ## Conclusions:
 I made some other optimizations, and identified some that I never introduced.
 But the main point was to play with rust, so I'll comment on that now.
@@ -216,10 +215,7 @@ rustup doc --std
 rustup doc --book
 ```
 
-The borrow checker took a little getting used to, but the compiler errors were extremely helpful.
-I was usually able to take the compiler's suggested change to fix borrowing errors.
-
-The main complaint I have so far is the number of features currently on the nightly release. (I prefer to stay on stable).
+The borrow checker took a little getting used to, but the compiler errors were extremely helpful. I was usually able to take the compiler's suggested change to fix borrowing errors. The main complaint I have so far is the number of features currently on the nightly release. (I prefer to stay on stable).
 At the time of writing some of these are:
 
 * std::collections::Range (in particular the ```contains``` method)
