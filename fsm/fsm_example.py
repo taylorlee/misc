@@ -2,15 +2,12 @@
 '''
 from fsm import FSM
 
-
 fsm = FSM({
     'add'    ,
     'run'    ,
     'change' ,
     'rerun'  ,
 })
-
-
 
 fsm.transition ( 'add'    , 'run'    , 'new test'    )
 fsm.fail       ( 'run'    , 'change' , 'test fails'  )

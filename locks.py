@@ -1,4 +1,5 @@
-'''Quick implementation of optimistic locking on relational table rows
+'''
+Quick implementation of optimistic locking on relational table rows
 and pessimistic locking on external resources
 '''
 

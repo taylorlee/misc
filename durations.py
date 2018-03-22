@@ -1,3 +1,18 @@
+'''
+A handy shortcut wrapper for python datetimes and relativedeltas.
+
+e.g.
+>>> from durations import *
+>>> days
+Duration(days=+1)
+>>> days.ago
+Lazy<mul on Duration(days=+1)>
+>>> 2*days.ago
+datetime.datetime(2018, 3, 20, 2, 51, 49, 206979, tzinfo=<UTC>)
+>>> 2*days.ago + 3*hours
+datetime.datetime(2018, 3, 20, 5, 51, 57, 230161, tzinfo=<UTC>)
+
+'''
 import operator
 from datetime import datetime
 from pytz import utc
