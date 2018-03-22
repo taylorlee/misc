@@ -175,10 +175,7 @@ I experimented with a few other optimizations (mostly stack/heap data locality),
 
 ## From Arrays to HashSets:
 
-My solution to removing the bounding nature of the grid was to separate the idea of the cell space and the view pane.
-The new game board would consist of the set of all coordinates currently living.
-The print representiation would iterate over the desired window coordinates, printing cells if those coordinate were part of the currently living set.
-This has the nice property of reducing the computational complexity to O(number_currently_living_cells).
+My solution to removing the bounding nature of the grid was to separate the idea of the cell space and the view pane. The new game board would consist of the set of all coordinates currently living. The print representiation would iterate over the desired window coordinates, printing cells if those coordinate were part of the currently living set. This has the nice property of reducing the computational complexity to O(number_currently_living_cells).
 
 ```rust
 use std::usize::MAX;
@@ -186,6 +183,8 @@ use std::usize::MAX;
 const DIM : usize = MAX;
 const OFFSET: usize = DIM / 2;
 const VIEW: Range<usize> = (OFFSET-VIEWSIZE/2..1+OFFSET+VIEWSIZE/2);
+
+type Board = HashSet<(usize, usize)>;
 ```
 
 Note: The simulation *is* still bounded, but MAX (9223372036854775807 on my computer) is more than enough for my purposes.
