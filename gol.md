@@ -185,7 +185,7 @@ use std::usize::MAX;
 
 const DIM : usize = MAX;
 const OFFSET: usize = DIM / 2;
-const VIEW: (usize, usize) = (OFFSET - VIEWSIZE/2, OFFSET+VIEWSIZE/2);
+const VIEW: Range<usize> = (OFFSET-VIEWSIZE/2..1+OFFSET+VIEWSIZE/2);
 ```
 
 Note: The simulation *is* still bounded, but MAX (9223372036854775807 on my computer) is more than enough for my purposes.
