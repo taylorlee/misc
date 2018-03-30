@@ -1,4 +1,5 @@
-miscelaneous musings and software snippets
+
+miscellaneous musings and software snippets
 
 ## Musings
 * [Deriving the Y-Combinator Through Refactoring JS](https://github.com/taylorlee/misc/blob/master/yc.md)
