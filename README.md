@@ -6,4 +6,4 @@
 * [Game of Life in Rust](https://github.com/taylorlee/misc/blob/master/game_of_life.rs)
 
 
-see also [taylorlee.xyz](taylorlee.xyz)
+see also [taylorlee.xyz](https://taylorlee.xyz)
