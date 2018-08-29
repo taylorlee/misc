@@ -3,13 +3,13 @@ from pygraphviz import AGraph
 class FSM(object):
     '''Finite State Machine'''
 
-    def __init__(self, finite_states):
+    def __init__(self, finite_states, directed=True):
         self.states = finite_states
         nodes = {
             state : []
             for state in finite_states
         }
-        self.graph = AGraph(nodes, directed=True, strict=False)
+        self.graph = AGraph(nodes, directed=directed, strict=False)
         self.edgesize = len(nodes) / 5.0
         return
 
