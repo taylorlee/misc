@@ -1,5 +1,7 @@
 from pygraphviz import AGraph
 
+prog = ['neato'|'dot'|'twopi'|'circo'|'fdp'|'nop']
+
 class FSM(object):
     '''Finite State Machine'''
 

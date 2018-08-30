@@ -10,15 +10,45 @@ from fsm.fsm import FSM
 X = np.array([[0,1],[1,0]])
 Y = np.array([[0,-1j],[1j, 0]])
 Z = np.array([[1,0],[0,-1]])
+Rots = [X,Y,Z]
 
-rot_names = {
-    str(X): 'X',
-    str(Y): 'Y',
-    str(Z): 'Z',
-}
+def main():
+    do_axis(X)
+    do_axis(Y)
+    do_axis(Z)
 
-x0, x1 = eig(X)[1]
-y0, y1 = eig(Y)[1]
+def do_axis(rot):
+    big_redo(rot, Rots)
+
+def expand_states(rot):
+    a,b = eig(rot)[1]
+    states = [a,b]
+    for i in range(len(states)):
+        x = states[i]
+        states.append(x*1j)
+    for i in range(len(states)):
+        x = states[i]
+        states.append(-x)
+    return states
+
+def dfs(unseen, rots):
+    seen = []
+    graph = defaultdict(set)
+    while len(unseen) > 0:
+        node = unseen.pop()
+        seen.append(node)
+        for rot in rots:
+            new = rot @ node
+            for old in seen:
+                if like(new, old):
+                    graph[fmt_pole(node)].add((fmt_pole(old), fmt_rot(rot)))
+                    break
+            else: #no break
+                graph[fmt_pole(node)].add((fmt_pole(new), fmt_rot(rot)))
+                unseen.append(new)
+            print(graph)
+              
+    return graph
 
 def neutralize(num):
     if num.imag:
@@ -26,53 +56,60 @@ def neutralize(num):
     return num.real
 
 def fmt_pole(pole):
+    return pole_names[stringify_pole(pole)]
+
+def stringify_pole(pole):
     return str(tuple(
         neutralize(num)
         for num in pole
     ))
 
-pole_names = {}
-for i, pole in enumerate([x0,x1]):
-    name = 'x' + str(i)
-    idx = fmt_pole(pole)
-    pole_names[idx] = name
+def fmt_rot(rot):
+    return rot_names[str(rot)]
 
-    idx = fmt_pole(-pole)
-    pole_names[idx] = '-' + name
-    
-    idx = fmt_pole(pole*1j)
-    pole_names[idx] = name + '*j'
-
-    idx = fmt_pole(pole*-1j)
-    pole_names[idx] = '-' + name + '*j'
-
-
-
-
-
-def main():
-    graph = dfs([x0,x1, -x0, -x1, x0*1j, x1*1j, -x0*1j, -x1*1j], [X,Y,Z])
-    prettify(graph)
-
-
-def dfs(unseen, rots):
-    seen = []
-    graph = defaultdict(set)
-    while len(unseen) > 0:
-        #print(seen, unseen, graph)
-        node = unseen.pop()
-        seen.append(node)
+def big_redo(axis, rots):
+    fsm = FSM(pole_names.values(), directed=False)
+    states = expand_states(axis)
+    seen = set()
+    for state in states:
         for rot in rots:
-            new = rot @ node
-            for old in seen:
-                if like(new, old):
-                    graph[fmt_pole(node)].add((fmt_pole(old), str(rot)))
-                    break
-            else: #no break
-                graph[fmt_pole(node)].add((fmt_pole(new), str(rot)))
-                unseen.append(new)
-              
-    return graph
+            subj = fmt_pole(state)
+            verb = fmt_rot(rot)
+            obj = fmt_pole(state @ rot)
+            fmt = (subj, verb, obj)
+            if (subj, obj) in seen or (obj, subj) in seen:
+                continue
+            else:
+                seen.add( (subj, obj) )
+            print('{} {} {}'.format(*fmt))
+            fsm.transition(subj, obj, verb)
+
+    fsm.save(name='bloch-{}'.format(fmt_rot(axis)), prog='neato')
+
+def build_pole_names():
+    ret = {}
+    for rot in Rots:
+        ret.update(_build_pole_names(rot))
+    return ret
+
+def _build_pole_names(rot):
+    letter = fmt_rot(rot).lower()
+    itr = eig(rot)[1]
+    pn = {}
+    for i, pole in enumerate(itr):
+        name = letter + str(i)
+        idx = stringify_pole(pole)
+        pn[idx] = name
+
+        idx = stringify_pole(-pole)
+        pn[idx] = '-' + name
+        
+        idx = stringify_pole(pole*1j)
+        pn[idx] = name + '*j'
+
+        idx = stringify_pole(pole*-1j)
+        pn[idx] = '-' + name + '*j'
+    return pn
 
 def prettify(graph):
     fsm = FSM(pole_names.values(), directed=False)
@@ -80,10 +117,7 @@ def prettify(graph):
         for adj, edge in entries:
             fmt = []
             for elem, namer in zip([node, edge, adj], [pole_names, rot_names, pole_names]):
-                if str(elem) in rot_names:
-                    fmt += [namer[str(elem)]]
-                else:
-                    fmt += [namer[elem]]
+                fmt += [elem]
 
             print('{} {} {}'.format(*fmt))
             subj, verb, obj = fmt
@@ -95,3 +129,12 @@ def like(a, b):
     same = ratio == 1
     flip = ratio == -1
     return same.all() or flip.all()
+
+rot_names = {
+    str(X): 'X',
+    str(Y): 'Y',
+    str(Z): 'Z',
+}
+pole_names = build_pole_names()
+
+
