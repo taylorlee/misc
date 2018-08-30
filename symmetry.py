@@ -2,15 +2,46 @@
 import numpy as np
 from numpy.linalg import eig
 
-from collections import defaultdict
-
 from fsm.fsm import FSM
-
 
 X = np.array([[0,1],[1,0]])
 Y = np.array([[0,-1j],[1j, 0]])
 Z = np.array([[1,0],[0,-1]])
+
+
+
+Z = np.array([
+    [-1,0,0],
+    [0,-1,0],
+    [0,0,1],
+])
+Y = np.array([
+    [-1,0,0],
+    [0,1,0],
+    [0,0,-1],
+])
+
+X= np.array([
+    [1,0, 0],
+    [0,-1, 0],
+    [0,0, -1],
+])
+
 Rots = [X,Y,Z]
+
+#TODO: S3 has issues!
+rot_names = {
+    str(X): 'EW',
+    str(Y): 'NS',
+    str(Z): 'TB',
+}
+pole_names = {}
+
+
+
+def splay(l):
+    for x in l:
+        print(x)
 
 def main():
     do_axis(X)
@@ -18,11 +49,14 @@ def main():
     do_axis(Z)
 
 def do_axis(rot):
+    pole_names.clear()
+    pole_names.update(_build_pole_names(rot))
     big_redo(rot, Rots)
 
 def expand_states(rot):
-    a,b = eig(rot)[1]
-    states = [a,b]
+    #TODO: back to a,b
+    a,b,c = eig(rot)[1]
+    states = [a,b,c]
     for i in range(len(states)):
         x = states[i]
         states.append(x*1j)
@@ -31,36 +65,17 @@ def expand_states(rot):
         states.append(-x)
     return states
 
-def dfs(unseen, rots):
-    seen = []
-    graph = defaultdict(set)
-    while len(unseen) > 0:
-        node = unseen.pop()
-        seen.append(node)
-        for rot in rots:
-            new = rot @ node
-            for old in seen:
-                if like(new, old):
-                    graph[fmt_pole(node)].add((fmt_pole(old), fmt_rot(rot)))
-                    break
-            else: #no break
-                graph[fmt_pole(node)].add((fmt_pole(new), fmt_rot(rot)))
-                unseen.append(new)
-            print(graph)
-              
-    return graph
-
 def neutralize(num):
     if num.imag:
         return complex(num.real or 0, num.imag)
-    return num.real
+    return num.real or 0
 
 def fmt_pole(pole):
     return pole_names[stringify_pole(pole)]
 
 def stringify_pole(pole):
     return str(tuple(
-        neutralize(num)
+        "{0:.10f}".format(neutralize(num))
         for num in pole
     ))
 
@@ -84,7 +99,8 @@ def big_redo(axis, rots):
             print('{} {} {}'.format(*fmt))
             fsm.transition(subj, obj, verb)
 
-    fsm.save(name='bloch-{}'.format(fmt_rot(axis)), prog='neato')
+    fsm.save(name='bloch/{}-neato'.format(fmt_rot(axis)), prog='neato')
+    fsm.save(name='bloch/{}-dot'.format(fmt_rot(axis)), prog='dot')
 
 def build_pole_names():
     ret = {}
@@ -111,30 +127,8 @@ def _build_pole_names(rot):
         pn[idx] = '-' + name + '*j'
     return pn
 
-def prettify(graph):
-    fsm = FSM(pole_names.values(), directed=False)
-    for node, entries in graph.items():
-        for adj, edge in entries:
-            fmt = []
-            for elem, namer in zip([node, edge, adj], [pole_names, rot_names, pole_names]):
-                fmt += [elem]
-
-            print('{} {} {}'.format(*fmt))
-            subj, verb, obj = fmt
-            fsm.transition(subj, obj, verb)
-    fsm.save(name='bloch')
-
 def like(a, b):
     ratio = a/b
     same = ratio == 1
     flip = ratio == -1
     return same.all() or flip.all()
-
-rot_names = {
-    str(X): 'X',
-    str(Y): 'Y',
-    str(Z): 'Z',
-}
-pole_names = build_pole_names()
-
-
