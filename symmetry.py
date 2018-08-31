@@ -20,7 +20,6 @@ Y = np.array([
     [0,1,0],
     [0,0,-1],
 ])
-
 X= np.array([
     [1,0, 0],
     [0,-1, 0],
@@ -38,12 +37,28 @@ rot_names = {
 pole_names = {}
 
 
-
 def splay(l):
     for x in l:
         print(x)
 
 def main():
+    do_s3()
+    #do_bloch()
+
+def do_s3():
+    pole_names.clear()
+    states = []
+    for rot in Rots:
+        pn = _build_pole_names(rot, imag=False)
+        states += expand_states_cart(rot)
+        print(states, pole_names)
+        import ipdb; ipdb.set_trace()
+        pole_names.update(pn)
+    title = 'S3'
+    big_redo(states, Rots, title) 
+
+
+def do_bloch():
     do_axis(X)
     do_axis(Y)
     do_axis(Z)
@@ -51,12 +66,21 @@ def main():
 def do_axis(rot):
     pole_names.clear()
     pole_names.update(_build_pole_names(rot))
-    big_redo(rot, Rots)
+    states = expand_states_bloch(rot)
+    title = fmt_pole(rot)
+    big_redo(states, Rots, title) 
 
-def expand_states(rot):
-    #TODO: back to a,b
+def expand_states_cart(rot):
     a,b,c = eig(rot)[1]
     states = [a,b,c]
+    for i in range(len(states)):
+        x = states[i]
+        states.append(-x)
+    return states
+
+def expand_states_bloch(rot):
+    a,b = eig(rot)[1]
+    states = [a,b]
     for i in range(len(states)):
         x = states[i]
         states.append(x*1j)
@@ -74,6 +98,7 @@ def fmt_pole(pole):
     return pole_names[stringify_pole(pole)]
 
 def stringify_pole(pole):
+    #TODO: needs to work for TRIPLES!
     return str(tuple(
         "{0:.10f}".format(neutralize(num))
         for num in pole
@@ -82,9 +107,8 @@ def stringify_pole(pole):
 def fmt_rot(rot):
     return rot_names[str(rot)]
 
-def big_redo(axis, rots):
+def big_redo(states, rots, title):
     fsm = FSM(pole_names.values(), directed=False)
-    states = expand_states(axis)
     seen = set()
     for state in states:
         for rot in rots:
@@ -99,8 +123,8 @@ def big_redo(axis, rots):
             print('{} {} {}'.format(*fmt))
             fsm.transition(subj, obj, verb)
 
-    fsm.save(name='bloch/{}-neato'.format(fmt_rot(axis)), prog='neato')
-    fsm.save(name='bloch/{}-dot'.format(fmt_rot(axis)), prog='dot')
+    fsm.save(name='bloch/{}-neato'.format(title), prog='neato')
+    fsm.save(name='bloch/{}-dot'.format(title), prog='dot')
 
 def build_pole_names():
     ret = {}
@@ -108,7 +132,7 @@ def build_pole_names():
         ret.update(_build_pole_names(rot))
     return ret
 
-def _build_pole_names(rot):
+def _build_pole_names(rot, imag=True):
     letter = fmt_rot(rot).lower()
     itr = eig(rot)[1]
     pn = {}
@@ -119,12 +143,12 @@ def _build_pole_names(rot):
 
         idx = stringify_pole(-pole)
         pn[idx] = '-' + name
-        
-        idx = stringify_pole(pole*1j)
-        pn[idx] = name + '*j'
+        if imag: 
+            idx = stringify_pole(pole*1j)
+            pn[idx] = name + '*j'
 
-        idx = stringify_pole(pole*-1j)
-        pn[idx] = '-' + name + '*j'
+            idx = stringify_pole(pole*-1j)
+            pn[idx] = '-' + name + '*j'
     return pn
 
 def like(a, b):
