@@ -1,74 +1,86 @@
 #something must be wrong!!! some not symmetric
+
+
+# TODO
+# look at states for H
+# states with tau/4 rotations
+
 import numpy as np
 from numpy.linalg import eig
 
 from fsm.fsm import FSM
 
-X = np.array([[0,1],[1,0]])
-Y = np.array([[0,-1j],[1j, 0]])
-Z = np.array([[1,0],[0,-1]])
-
-
-
-Z = np.array([
-    [-1,0,0],
-    [0,-1,0],
-    [0,0,1],
+Xb = np.array([
+    [0,1],
+    [1,0],
 ])
-Y = np.array([
-    [-1,0,0],
-    [0,1,0],
-    [0,0,-1],
+Yb = np.array([
+    [0,-1j],
+    [1j, 0],
 ])
-X= np.array([
+Zb = np.array([
+    [1,0],
+    [0,-1],
+])
+Bloch = [Xb, Yb, Zb]
+
+Xs = np.array([
     [1,0, 0],
     [0,-1, 0],
     [0,0, -1],
 ])
+Ys = np.array([
+    [-1,0,0],
+    [0,1,0],
+    [0,0,-1],
+])
+Zs = np.array([
+    [-1,0,0],
+    [0,-1,0],
+    [0,0,1],
+])
+Cart = [Xs, Ys, Zs]
 
-Rots = [X,Y,Z]
-
-#TODO: S3 has issues!
-rot_names = {
-    str(X): 'EW',
-    str(Y): 'NS',
-    str(Z): 'TB',
-}
+rot_names = {}
 pole_names = {}
-
 
 def splay(l):
     for x in l:
         print(x)
 
 def main():
-    do_s3()
-    #do_bloch()
+    #do_s3()
+    do_bloch()
+
+def set_rot_names(rots):
+    for rot, name in zip(rots, 'XYZ'):
+        rot_names[str(rot)] = name
+
 
 def do_s3():
+    set_rot_names(Cart)
     pole_names.clear()
     states = []
-    for rot in Rots:
+    for rot in [Zs]:
         pn = _build_pole_names(rot, imag=False)
         states += expand_states_cart(rot)
-        print(states, pole_names)
-        import ipdb; ipdb.set_trace()
         pole_names.update(pn)
     title = 'S3'
-    big_redo(states, Rots, title) 
-
+    big_redo(states, Cart, title) 
 
 def do_bloch():
-    do_axis(X)
-    do_axis(Y)
-    do_axis(Z)
+    import ipdb; ipdb.set_trace()
+    set_rot_names(Bloch)
+    do_axis(Xb)
+    do_axis(Yb)
+    do_axis(Zb)
 
 def do_axis(rot):
     pole_names.clear()
     pole_names.update(_build_pole_names(rot))
     states = expand_states_bloch(rot)
     title = fmt_pole(rot)
-    big_redo(states, Rots, title) 
+    big_redo(states, Bloch, title) 
 
 def expand_states_cart(rot):
     a,b,c = eig(rot)[1]
@@ -98,7 +110,6 @@ def fmt_pole(pole):
     return pole_names[stringify_pole(pole)]
 
 def stringify_pole(pole):
-    #TODO: needs to work for TRIPLES!
     return str(tuple(
         "{0:.10f}".format(neutralize(num))
         for num in pole
@@ -116,21 +127,16 @@ def big_redo(states, rots, title):
             verb = fmt_rot(rot)
             obj = fmt_pole(state @ rot)
             fmt = (subj, verb, obj)
+            print('{} {} {}'.format(*fmt))
             if (subj, obj) in seen or (obj, subj) in seen:
+                print('skip ^^')
                 continue
             else:
                 seen.add( (subj, obj) )
-            print('{} {} {}'.format(*fmt))
             fsm.transition(subj, obj, verb)
 
     fsm.save(name='bloch/{}-neato'.format(title), prog='neato')
     fsm.save(name='bloch/{}-dot'.format(title), prog='dot')
-
-def build_pole_names():
-    ret = {}
-    for rot in Rots:
-        ret.update(_build_pole_names(rot))
-    return ret
 
 def _build_pole_names(rot, imag=True):
     letter = fmt_rot(rot).lower()
@@ -151,8 +157,3 @@ def _build_pole_names(rot, imag=True):
             pn[idx] = '-' + name + '*j'
     return pn
 
-def like(a, b):
-    ratio = a/b
-    same = ratio == 1
-    flip = ratio == -1
-    return same.all() or flip.all()
